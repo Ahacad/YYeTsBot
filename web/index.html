@@ -53,7 +53,53 @@
         /*a:hover::after {*/
         /*    display: block;*/
         /*}*/
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
 
+            /*background-color: #f1f1f1;*/
+        }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            text-align: center;
+            background-color: inherit;
+            float: inherit;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .footer {
+            text-decoration: none;
+            color: green;
+        }
     </style>
 </head>
 <body>
@@ -61,8 +107,9 @@
     <h1>人人影视下载分享</h1>
     <h1>By Benny</h1>
     <br>
-    <h2>本站数据库<b><a style="text-decoration: none;color: skyblue" href="https://t.me/mikuri520/668">永久开源免费</a></b>，<abbr
-            style="text-decoration: none" title="你也爬不下来啊">请不要做无意义的爬虫</abbr>
+    <h2>本站数据库<b><a style="color: skyblue" href="https://t.me/mikuri520/668">永久开源免费</a></b>，<abbr
+            style="text-decoration: none" title="你也爬不下来啊">请不要做无意义的爬虫。</abbr>
+        <a href="help.html" style="color: deepskyblue">使用帮助？</a>
     </h2>
 
     <form action="search.html">
@@ -71,17 +118,23 @@
         </label>
         <input type="submit" value="搜索">
     </form>
-    <hr>
-    <div id="tv">
-        <h2>大家都在看……</h2>
+    <br>
+    <h2>大家都在看🤔……</h2>
+    <div class="tab">
+
     </div>
-    <hr>
-    <h2>相关资源</h2>
+
+    <div id="topContent">
+
+    </div>
+
+    <h2>相关资源⬇️</h2>
     <h3>
-        联系我 <a style="text-decoration: none;color: green" href="https://t.me/BennyThink">Benny 小可爱</a>・
-        YYeTs 机器人<a style="text-decoration: none;color: green" href="https://t.me/yyets_bot">Telegram Bot</a>・
-        开源 <a style="text-decoration: none;color: green" href="https://github.com/tgbot-collection/YYeTsBot">GitHub</a>・
-        我的博客 <a style="text-decoration: none;color: green" href="https://dmesg.app/">土豆不好吃</a>
+        联系我 <a class="footer" href="https://t.me/BennyThink">Benny 小可爱</a>・
+        YYeTs 机器人<a class="footer" href="https://t.me/yyets_bot">Telegram Bot</a>・
+        Telegram <a class="footer" href="https://t.me/mikuri520">Channel</a>・
+        开源 <a class="footer" href="https://github.com/tgbot-collection/YYeTsBot">GitHub</a>・
+        我的博客 <a class="footer" href="https://dmesg.app/">土豆不好吃</a>
     </h3>
 </div>
 </body>
@@ -89,11 +142,13 @@
 <script src="js/analytics.js"></script>
 
 <script>
+    accessMetrics();
+
     // get top
-    axios.get('/api/top?type=all')
+    axios.get('/api/top')
         .then(function (response) {
             // handle success
-            showTop(response.data.data)
+            showTop(response.data)
             // console.log(response.data);
         })
         .catch(function (error) {
@@ -106,20 +161,59 @@
 
 
     function showTop(data) {
+        const code2Name = data["class"];
+        let buttonParent = document.getElementsByClassName("tab")[0]
+        let topParent = document.getElementById("topContent")
+        delete data["class"];
+        for (let code in data) {
+            let button = `<button class="tablinks" onclick="openCity(event, '${code}')">${code2Name[code]}</button>`;
+            let div = `<div id="${code}" class="tabcontent"></div>`;
 
-        let div = document.getElementById("tv");
-        for (let i = 0; i < data.length; i++) {
-            let info = data[i].data.info
-            let name = `${info.cnname} ${info.enname} ${info.aliasname}`;
-            let html = `<h4><a title="浏览量 ${info.views}" style="text-decoration: none;color: cornflowerblue" href="/resource.html?id=${info.id}">${name}</a></h4>`;
-            let backup = div.innerHTML;
-            div.innerHTML = backup + html;
+            let buttonChild = document.createElement('button');
+            buttonChild.innerHTML = button;
+            buttonChild = buttonChild.firstChild;
+            buttonParent.appendChild(buttonChild);
+
+            let divChild = document.createElement('div');
+            divChild.innerHTML = div;
+            divChild = divChild.firstChild;
+            topParent.appendChild(divChild);
+
+            // render data
+            let countryInfo = data[code]
+            // let div = HTMLElement
+            for (let each in countryInfo) {
+                let info = countryInfo[each]["data"]["info"];
+                let divParent = document.getElementById(code);
+                let name = `${info.cnname} ${info.enname} ${info.aliasname}`;
+                let html = `<h4><a title="浏览量 ${info.views}" style="text-decoration: none;color: cornflowerblue" href="/resource.html?id=${info.id}">${name}</a></h4>`;
+
+                let divChild = document.createElement('h4');
+                divChild.innerHTML = html;
+                divChild = divChild.firstChild;
+                divParent.appendChild(divChild);
+            }
 
         }
-
+        document.getElementsByClassName("tab")[0].firstElementChild.className += " active"
+        document.getElementById("ALL").style.display = "block"
     }
 
-    accessMetrics();
+
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        console.log(evt)
+        evt.currentTarget.className += " active";
+    }
 
 </script>
 </html>
